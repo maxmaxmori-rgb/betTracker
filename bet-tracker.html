@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>BetTracker Pro</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --green: #10b981;
+      --green-bg: rgba(16, 185, 129, 0.15);
+      --red: #ef4444;
+      --red-bg: rgba(239, 68, 68, 0.15);
+      --blue: #3b82f6;
+      --yellow: #f59e0b;
+      --yellow-bg: rgba(245, 158, 11, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 16px;
+      max-width: 800px;
+      margin: 0 auto;
+      padding-bottom: 60px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    /* Dashboard Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    @media (min-width: 600px) {
+      .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-size: 1.35rem;
+      font-weight: 700;
+    }
+
+    .positive { color: var(--green); }
+    .negative { color: var(--red); }
+
+    /* Form */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    input, select {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--blue);
+    }
+
+    .btn-primary {
+      width: 100%;
+      background: var(--blue);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    .btn-primary:active {
+      opacity: 0.9;
+    }
+
+    /* Filters */
+    .filters {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+      overflow-x: auto;
+    }
+
+    .filter-btn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .filter-btn.active {
+      background: var(--blue);
+      color: white;
+      border-color: var(--blue);
+    }
+
+    /* List */
+    .bet-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .bet-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .bet-info {
+      flex: 1;
+    }
+
+    .bet-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .bet-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .badge-won { background: var(--green-bg); color: var(--green); }
+    .badge-lost { background: var(--red-bg); color: var(--red); }
+    .badge-pending { background: var(--yellow-bg); color: var(--yellow); }
+
+    .bet-meta {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .bet-actions {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .bet-profit {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .action-btns {
+      display: flex;
+      gap: 6px;
+    }
+
+    .mini-btn {
+      border: none;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-win { background: var(--green-bg); color: var(--green); }
+    .btn-lose { background: var(--red-bg); color: var(--red); }
+    .btn-del { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+    .empty-state {
+      text-align: center;
+      color: var(--muted);
+      padding: 30px 0;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>BetTracker Pro</h1>
+    <button class="btn-outline" onclick="exportCSV()">Esporta CSV</button>
+  </header>
+
+  <!-- Riepilogo KPI -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Profitto Netto</div>
+      <div class="stat-value" id="stat-profit">€ 0.00</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">ROI / Yield</div>
+      <div class="stat-value" id="stat-roi">0.0%</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Totale Puntato</div>
+      <div class="stat-value" id="stat-staked">€ 0.00</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Win Rate</div>
+      <div class="stat-value" id="stat-winrate">0%</div>
+    </div>
+  </div>
+
+  <!-- Nuova Giocata -->
+  <div class="card">
+    <div class="card-title">Nuova Operazione</div>
+    <form id="bet-form" class="form-grid">
+      <div class="full-width">
+        <label>Evento / Descrizione</label>
+        <input type="text" id="event" placeholder="Es. Inter - Juventus (1) o Promo Benvenuto" required>
+      </div>
+      <div>
+        <label>Bookmaker / Tipo</label>
+        <input type="text" id="bookmaker" placeholder="Es. Bet365 / Matched">
+      </div>
+      <div>
+        <label>Data</label>
+        <input type="date" id="date" required>
+      </div>
+      <div>
+        <label>Puntata / Uscita (€)</label>
+        <input type="number" id="stake" step="0.01" min="0" placeholder="0.00" required>
+      </div>
+      <div>
+        <label>Quota (o Moltiplicatore)</label>
+        <input type="number" id="odds" step="0.01" min="1" placeholder="1.85" required>
+      </div>
+      <div class="full-width">
+        <label>Esito</label>
+        <select id="status">
+          <option value="pending">In corso (Aperta)</option>
+          <option value="won">Vinta (Entrata)</option>
+          <option value="lost">Persa (Uscita)</option>
+        </select>
+      </div>
+      <div class="full-width">
+        <button type="submit" class="btn-primary">Registra Giocata</button>
+      </div>
+    </form>
+  </div>
+
+  <section class="card" id="archive">
+    <h2 class="card-title">Archivio foto schedine</h2>
+    <p>Puoi conservare una schedina anche senza inserire importo e quota. Le foto restano in questo browser. Per collegare una foto a una giocata, usa il pulsante nel registro.</p>
+    <form id="photo-form" class="form-grid">
+      <div><label for="camera">Scatta una foto</label><input type="file" id="camera" accept="image/*" capture="environment"></div><div><label for="receipt">Scegli dalla galleria</label><input id="receipt" type="file" accept="image/jpeg,image/png,image/webp"></div>
+      <div><label for="caption">Descrizione facoltativa</label><input id="caption" maxlength="160" placeholder="Es. Bolla di sabato"></div>
+      <div id="review" class="full-width" hidden><img id="receipt-preview" alt="Schedina da controllare" style="max-width:100%;max-height:320px"><p>Controlla gli importi prima del salvataggio. La lettura automatica richiede Internet.</p>
+      <label for="read-stake">Puntata (€)</label><input type="number" step=".01" min=".01" id="read-stake">
+      <label for="read-return">Vincita potenziale lorda (€)</label><input type="number" step=".01" min=".01" id="read-return">
+      <button class="btn-primary" type="submit" id="import-bet">Conferma importi e salva giocata con foto</button></div>
+      <div class="full-width"><span id="target"></span><button class="mini-btn" type="button" id="unlink" hidden>Scollega giocata</button>
+      <button class="btn-primary" id="store-photo" formnovalidate>Archivia solo la foto</button></div>
+    </form>
+    <p role="status" id="photo-status"></p><div id="photos"></div>
+  </section>
+  <dialog id="viewer" style="max-width:95vw"><button class="mini-btn" id="close-photo">Chiudi foto</button><img id="full-photo" alt="Foto della schedina" style="display:block;max-width:85vw;height:auto"></dialog>
+  <!-- Filtri e Lista -->
+  <div class="filters">
+    <button class="filter-btn active" onclick="setFilter('all', this)">Tutte</button>
+    <button class="filter-btn" onclick="setFilter('pending', this)">In corso</button>
+    <button class="filter-btn" onclick="setFilter('won', this)">Vinte</button>
+    <button class="filter-btn" onclick="setFilter('lost', this)">Perse</button>
+  </div>
+
+  <div class="bet-list" id="bet-list"></div>
+
+  <script>
+    let bets = JSON.parse(localStorage.getItem('betTrackerData')) || [];
+    let currentFilter = 'all';
+
+    // Imposta data odierna di default
+    document.getElementById('date').valueAsDate = new Date();
+
+    document.getElementById('bet-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const event = document.getElementById('event').value.trim();
+      const bookmaker = document.getElementById('bookmaker').value.trim() || 'Generico';
+      const date = document.getElementById('date').value;
+      const stake = parseFloat(document.getElementById('stake').value);
+      const odds = parseFloat(document.getElementById('odds').value);
+      const status = document.getElementById('status').value;
+
+      const newBet = {
+        id: Date.now(),
+        event,
+        bookmaker,
+        date,
+        stake,
+        odds,
+        status
+      };
+
+      bets.unshift(newBet);
+      saveAndRender();
+
+      // Reset campi principali
+      document.getElementById('event').value = '';
+      document.getElementById('stake').value = '';
+      document.getElementById('odds').value = '';
+      document.getElementById('status').value = 'pending';
+    });
+
+    function updateStatus(id, newStatus) {
+      bets = bets.map(bet => bet.id === id ? { ...bet, status: newStatus } : bet);
+      saveAndRender();
+    }
+
+    function deleteBet(id) {
+      if (confirm('Eliminare questa giocata?')) {
+        bets = bets.filter(bet => bet.id !== id);
+        saveAndRender();
+      }
+    }
+
+    function setFilter(filter, btn) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      render();
+    }
+
+    function saveAndRender() {
+      localStorage.setItem('betTrackerData', JSON.stringify(bets));
+      render();
+    }
+
+    function safeText(value) {
+      const span=document.createElement('span'); span.textContent=value; return span.innerHTML;
+    }
+    function render() {
+      const list = document.getElementById('bet-list');
+      list.innerHTML = '';
+
+      let totalProfit = 0;
+      let totalStaked = 0;
+      let settledCount = 0;
+      let wonCount = 0;
+
+      // Calcolo statistiche su tutte le scommesse
+      bets.forEach(bet => {
+        if (bet.status === 'won') {
+          const profit = (bet.stake * bet.odds) - bet.stake;
+          totalProfit += profit;
+          totalStaked += bet.stake;
+          settledCount++;
+          wonCount++;
+        } else if (bet.status === 'lost') {
+          totalProfit -= bet.stake;
+          totalStaked += bet.stake;
+          settledCount++;
+        }
+      });
+
+      const roi = totalStaked > 0 ? ((totalProfit / totalStaked) * 100).toFixed(1) : '0.0';
+      const winrate = settledCount > 0 ? Math.round((wonCount / settledCount) * 100) : 0;
+
+      const profitEl = document.getElementById('stat-profit');
+      profitEl.textContent = `${totalProfit >= 0 ? '+' : ''}€ ${totalProfit.toFixed(2)}`;
+      profitEl.className = 'stat-value ' + (totalProfit > 0 ? 'positive' : totalProfit < 0 ? 'negative' : '');
+
+      const roiEl = document.getElementById('stat-roi');
+      roiEl.textContent = `${roi}%`;
+      roiEl.className = 'stat-value ' + (parseFloat(roi) > 0 ? 'positive' : parseFloat(roi) < 0 ? 'negative' : '');
+
+      document.getElementById('stat-staked').textContent = `€ ${totalStaked.toFixed(2)}`;
+      document.getElementById('stat-winrate').textContent = `${winrate}%`;
+
+      // Filtraggio lista
+      const filteredBets = currentFilter === 'all'
+        ? bets
+        : bets.filter(b => b.status === currentFilter);
+
+      if (filteredBets.length === 0) {
+        list.innerHTML = '<div class="empty-state">Nessuna operazione registrata in questa vista.</div>';
+        return;
+      }
+
+      filteredBets.forEach(bet => {
+        let badgeClass = 'badge-pending';
+        let badgeText = 'In corso';
+        let profitDisplay = `Potenziale: € ${(bet.stake * bet.odds).toFixed(2)}`;
+        let profitColor = '';
+
+        if (bet.status === 'won') {
+          badgeClass = 'badge-won';
+          badgeText = 'Vinta';
+          const net = (bet.stake * bet.odds) - bet.stake;
+          profitDisplay = `+€ ${net.toFixed(2)}`;
+          profitColor = 'positive';
+        } else if (bet.status === 'lost') {
+          badgeClass = 'badge-lost';
+          badgeText = 'Persa';
+          profitDisplay = `-€ ${bet.stake.toFixed(2)}`;
+          profitColor = 'negative';
+        }
+
+        const item = document.createElement('div');
+        item.className = 'bet-item';
+        item.innerHTML = `
+          <div class="bet-info">
+            <div class="bet-header">
+              <span class="bet-title">${safeText(bet.event)}</span>
+              <span class="badge ${badgeClass}">${badgeText}</span>
+            </div>
+            <div class="bet-meta">
+              ${bet.date} • ${safeText(bet.bookmaker)} • Puntata: €${bet.stake.toFixed(2)} @ ${bet.odds.toFixed(2)}
+            </div>
+          </div>
+          <div class="bet-actions">
+            <div class="bet-profit ${profitColor}">${profitDisplay}</div>
+            <div class="action-btns">
+              ${bet.status === 'pending' ? `
+                <button class="mini-btn btn-win" onclick="updateStatus(${bet.id}, 'won')">Vinta</button>
+                <button class="mini-btn btn-lose" onclick="updateStatus(${bet.id}, 'lost')">Persa</button>
+              ` : ''}
+              <button class="mini-btn btn-del" onclick="deleteBet(${bet.id})">✕</button>
+            </div>
+          </div>
+        `;
+        const attach = document.createElement('button');
+        attach.className = 'mini-btn';
+        attach.textContent = 'Allega foto';
+        attach.onclick = () => { selectBet(bet); byId('receipt').focus(); };
+        item.querySelector('.action-btns').prepend(attach);
+        list.appendChild(item);
+      });
+    }
+
+    function exportCSV() {
+      if (bets.length === 0) return alert('Nessun dato da esportare.');
+
+      let csv = 'Data,Evento,Bookmaker,Puntata,Quota,Esito,Profitto Netto\n';
+      bets.forEach(b => {
+        let net = 0;
+        if (b.status === 'won') net = (b.stake * b.odds) - b.stake;
+        if (b.status === 'lost') net = -b.stake;
+        csv += `"${b.date}","${b.event.replace(/"/g, '""')}","${b.bookmaker}",${b.stake},${b.odds},${b.status},${net.toFixed(2)}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `storico_scommesse_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+    }
+
+    const byId = id => document.getElementById(id);
+    let selectedBet = null;
+    function selectBet(bet) {
+      selectedBet = bet;
+      byId('target').textContent = bet ? 'Giocata: ' + bet.event + ' ' : '';
+      byId('unlink').hidden = !bet;
+    }
+    byId('unlink').onclick = () => selectBet(null);
+    const archiveDB = new Promise((resolve, reject) => {
+      const request = indexedDB.open('betTrackerPhotos', 1);
+      request.onupgradeneeded = () => request.result.createObjectStore('photos', {keyPath:'id', autoIncrement:true});
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    async function photoAction(mode, operation) {
+      const db = await archiveDB;
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction('photos', mode);
+        const request = operation(tx.objectStore('photos'));
+        tx.oncomplete = () => resolve(request.result);
+        tx.onabort = () => reject(tx.error);
+      });
+    }
+    const photoStatus = msg => { byId('photo-status').textContent = msg; };
+    async function showPhotos() {
+      const keys = await photoAction('readonly', store => store.getAllKeys());
+      const panel = byId('photos');
+      panel.replaceChildren();
+      if (!keys.length) panel.textContent = 'Nessuna schedina fotografata.';
+      for (const key of keys.reverse()) {
+        const entry = await photoAction('readonly', store => store.get(key));
+        if (!entry) continue;
+        const row = document.createElement('p');
+        const open = document.createElement('button');
+        open.className = 'btn-outline';
+        open.textContent = entry.title + ' · ' + new Date(entry.date).toLocaleDateString('it-IT');
+        open.onclick = async () => {
+          try {
+            const record = await photoAction('readonly', store => store.get(key));
+            byId('full-photo').src = URL.createObjectURL(record.blob);
+            byId('viewer').showModal();
+          } catch { photoStatus('Impossibile aprire la foto.'); }
+        };
+        const remove = document.createElement('button');
+        remove.className = 'mini-btn btn-del';
+        remove.textContent = 'Elimina foto';
+        remove.onclick = async () => {
+          if (!confirm('Eliminare questa foto dall’archivio?')) return;
+          try { await photoAction('readwrite', store => store.delete(key)); await showPhotos(); }
+          catch { photoStatus('Impossibile eliminare la foto.'); }
+        };
+        row.append(open, ' ', remove);
+        panel.append(row);
+      }
+    }
+    byId('close-photo').onclick = () => byId('viewer').close();
+    byId('viewer').onclose = () => {
+      URL.revokeObjectURL(byId('full-photo').src);
+      byId('full-photo').removeAttribute('src');
+    };
+    let receiptFile, scanVersion = 0, previewUrl, enginePromise;
+    function loadEngine() {
+      if (window.Tesseract) return Promise.resolve(window.Tesseract);
+      if (!enginePromise) enginePromise = new Promise((resolve,reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
+        script.onload = () => resolve(window.Tesseract);
+        script.onerror = () => { enginePromise = null; reject(Error('OCR')); };
+        document.head.append(script);
+      });
+      return enginePromise;
+    }
+    function readAmounts(text) {
+      const lines = text.toLowerCase().split(/\r?\n/);
+      function amount(label) {
+        const candidates = new Set();
+        for(let i=0;i<lines.length;i++){
+          const m=label.exec(lines[i]);
+          if(!m) continue;
+          let tail=lines[i].slice(m.index+m[0].length).trim();
+          if (/^[\s:€=-]*(?:eur[o]?)?[\s:€=-]*$/.test(tail)) tail=lines[i+1]||'';
+          const match=tail.match(/^[\s:€=-]*(?:eur[o]?\s*)?(\d{1,3}(?:\.\d{3})+,\d{2}|\d+(?:[.,]\d{1,2})?)(?![\d.,])/);
+          if(match) candidates.add(Number(match[1].includes(',')?match[1].replace(/\./g,'').replace(',','.'):match[1]));
+        }
+        return candidates.size===1?[...candidates][0]:'';
+      }
+      return [amount(/\b(?:importo (?:totale (?:giocato|scommesso)|scommesso|giocato|giocata|scommessa|puntata)|totale (?:giocato|scommesso|puntata)|puntata(?: totale)?|stake)\b/),
+        amount(/\b(?:vincita (?:potenziale|possibile|massima|prevista|totale)|(?:potenziale|possibile|massima) vincita|ritorno potenziale|potential (?:return|winnings))\b/)];
+    }
+    async function scan(file) {
+      const version=++scanVersion;
+      receiptFile=file;
+      byId('review').hidden=false;
+      byId('read-stake').value=byId('read-return').value='';
+      URL.revokeObjectURL(previewUrl);
+      byId('receipt-preview').src=previewUrl=URL.createObjectURL(file);
+      photoStatus('Lettura della schedina in corso…');
+      let worker;
+      try {
+        const engine=await loadEngine();
+        if(version!==scanVersion)return;
+        worker=await engine.createWorker('ita');
+        if(version!==scanVersion)return;
+        const result=await worker.recognize(file);
+        if(version!==scanVersion)return;
+        const [stake,payout]=readAmounts(result.data.text);
+        if(!byId('read-stake').value)byId('read-stake').value=stake;
+        if(!byId('read-return').value)byId('read-return').value=payout;
+        photoStatus(stake&&payout?'Controlla gli importi letti prima di confermare.':'Lettura parziale. Controlla la foto e completa gli importi.');
+      } catch { if(version===scanVersion)photoStatus('Lettura automatica indisponibile. Inserisci gli importi visibili sulla foto.'); }
+      finally { if(worker)await worker.terminate(); }
+    }
+    for(const id of ['camera','receipt'])byId(id).onchange=e=>{
+      const file=e.target.files[0]; if(file)scan(file);
+    };
+    byId('photo-form').onsubmit = async e => {
+      e.preventDefault();
+      const file = receiptFile;
+      if (!file) return photoStatus('Scatta o scegli una foto.');
+      const importing=e.submitter?.id==='import-bet';
+      const stake=byId('read-stake').valueAsNumber, payout=byId('read-return').valueAsNumber;
+      if(importing && (!(stake>0)||!(payout>=stake)))return photoStatus('Controlla puntata e vincita potenziale lorda.');
+      const bet = selectedBet;
+      const title = [bet?.event, byId('caption').value.trim()].filter(Boolean).join(' · ') || 'Schedina';
+      const fields=[...byId('photo-form').elements];
+      fields.forEach(f=>f.disabled=true);
+      let photoId;
+      const betId=bet?.id ?? (importing?Date.now():null);
+      const preview = URL.createObjectURL(file);
+      try {
+        const image = new Image();
+        image.src = preview;
+        await image.decode();
+        photoId=await photoAction('readwrite', store => store.add({title, date:Date.now(), betId, blob:file}));
+        if(importing){
+          const old=bets;
+          if(bet && !bets.some(b=>b.id===betId))throw Error('Giocata assente');
+          const values={stake,odds:payout/stake};
+          bets=bet?bets.map(b=>b.id===betId?{...b,...values}:b):[{id:betId,event:title,bookmaker:'Generico',date:new Date().toLocaleDateString('sv-SE'),status:'pending',...values},...bets];
+          try {saveAndRender()}catch(error){bets=old;throw error}
+        }
+        photoId=null;
+        scanVersion++;
+        receiptFile=null;
+        URL.revokeObjectURL(previewUrl);
+        byId('review').hidden=true;
+        byId('photo-form').reset();
+        selectBet(null);
+        photoStatus(importing?'Giocata e foto salvate.':'Foto archiviata.');
+        await showPhotos();
+      } catch { if(photoId)await photoAction('readwrite',store=>store.delete(photoId)); photoStatus('Archiviazione non riuscita. Controlla il formato della foto e lo spazio del browser.'); }
+      finally { URL.revokeObjectURL(preview); fields.forEach(f=>f.disabled=false); }
+    };
+    showPhotos().catch(() => photoStatus('Archivio foto non disponibile in questo browser.'));
+    render();
+  </script>
+</body>
+</html>
